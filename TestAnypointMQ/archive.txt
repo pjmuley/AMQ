@@ -1,0 +1,66 @@
+import javax.ws.rs.core.MultivaluedMap;
+
+import com.sun.jersey.api.client.Client;
+//import com.sun.jersey.api.client.ClientRequest;
+import com.sun.jersey.api.client.ClientResponse;
+import com.sun.jersey.api.client.WebResource;
+//import com.sun.jersey.core.util.MultivaluedMapImpl;
+
+import org.json.simple.JSONObject;
+import org.json.simple.parser.JSONParser;
+//import org.json.simple.parser.ParseException;
+
+
+
+
+public class TestAPI {
+	public static void main(String[] args){
+	try {
+		 
+		String queueName="myQueue";
+		String queueMessage="This is my message 2";
+		String authURI="https://mq-us-west-2.anypoint.mulesoft.com/api/v1/authorize";
+		
+		Client client = Client.create();
+		
+		WebResource webResource = client.resource(authURI);
+/*		MultivaluedMap<String, String> queryParams = new MultivaluedMapImpl();
+		queryParams.add("client_id","3939231b929147d5afb0326af2aa4dc7");
+		queryParams.add("client_secret","CA8E1342c84b4a64be7dcb393B67AF46");
+		queryParams.add("grant_type","client_credentials"); 
+*/
+		String input = "client_id=3939231b929147d5afb0326af2aa4dc7&client_secret=CA8E1342c84b4a64be7dcb393B67AF46&grant_type=client_credentials";		
+		ClientResponse response = webResource.header("Content-Type", "application/x-www-form-urlencoded").accept("application/json").post(ClientResponse.class, input);
+		
+		
+		if (response.getStatus() != 200) {
+			throw new RuntimeException("Failed : HTTP error code : " + response.getStatus());
+		}
+
+		String output2 = response.getEntity(String.class);
+		JSONParser jsonParser=new JSONParser();
+		JSONObject jsonObject= (JSONObject) jsonParser.parse(output2);
+		System.out.println("\n============Platform Reponse============");
+		System.out.println(output2);
+		System.out.println((String)jsonObject.get("access_token"));
+		JSONObject structure = (JSONObject) jsonObject.get("simple_client");
+		System.out.println((String)structure.get("envId"));
+		System.out.println((String)structure.get("orgId"));
+		
+		String uri = "https://mq-us-west-2.anypoint.mulesoft.com/api/v1/organizations/" + (String)structure.get("orgId") +"/environments/"+(String)structure.get("envId")+"/destinations/"+ queueName+"/messages";
+		WebResource webResource2 = client.resource(uri);
+	//	webResource2.setProperty("Content-Type", "application/json");
+	//	webResource2.setProperty("Authorization:", "bearer" + (String)jsonObject.get("access_token"));
+		String input2="{ \"body\": \""+queueMessage+"\" }";
+		ClientResponse response2=webResource2.header("Authorization"," bearer" + (String)jsonObject.get("access_token")).type("application/json").accept("application/json").put(ClientResponse.class, input2);
+		String output3 = response2.getEntity(String.class);
+		System.out.println(output3);
+
+
+
+
+	} catch (Exception e) {
+		e.printStackTrace();
+	}
+	}
+}
