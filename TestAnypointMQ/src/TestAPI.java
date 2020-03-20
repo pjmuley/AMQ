@@ -18,8 +18,8 @@ public class TestAPI {
 	public static void main(String[] args){
 	try {
 		 
-		String client_id="85b5625ef2024651ab1997094fb968fd";
-		String client_secret="2B7920956ef145429914b61d9Aa3B3b1";
+		String client_id="#";
+		String client_secret="#";
 		String queueName="myQueue";
 		String queueMessage="This is my message 10";
 		String authURI="https://mq-us-west-2.anypoint.mulesoft.com/api/v1/authorize";
